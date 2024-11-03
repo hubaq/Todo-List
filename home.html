@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="header"></header>
+    <div class="every">
+      <div class="wrapper">
+        <h1 class="todo">TODO</h1>
+        <img src="images/icon-sun.svg" alt="" class="toggle" />
+      </div>
+      <div class="wrap">
+        <div class="cont">
+          <input type="checkbox" name="checkbox" class="check" />
+          <label for="checkbox"></label>
+        </div>
+        <input type="text" class="todo-input" placeholder="Create a new todo..." />
+      </div>
+      <div class="todo-container">
+        <div class="down">
+          <p class="length">0 items left</p>
+          <p class="clear">Clear Completed</p>
+          <div class="down__gap">
+            <p class="all">All</p>
+            <p class="active">Active</p>
+            <p class="completed">Completed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="display__toast"></section>
+
+    <template id="toast__template">
+      <div class="toast__container">
+        <div class="toast__image"></div>
+        <div class="toast__message"></div>
+        <div class="close__toast">&times;</div>
+      </div>
+    </template>
+  </body>
+</html>
