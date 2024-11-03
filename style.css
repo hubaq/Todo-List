@@ -384,7 +384,7 @@ label {
   }
 }
 
-@media screen and (min-width: 375px) and (max-width: 641px) {
+@media screen and (min-width: 312px) and (max-width: 641px) {
   header {
     width: 100%;
   }
