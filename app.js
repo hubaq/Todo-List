@@ -1,4 +1,4 @@
-'use strict';
+just'use strict';
 
 //  Selecting all the used DOM elements
 const toggle = document.querySelector('.toggle');
@@ -171,92 +171,187 @@ const createDiv = function () {
   imgg.className = 'image';
 
   if (body.classList.contains('display')) {
-    p.style.color = 'var(--very-dark-blue)';
-  } else {
-    p.style.color = 'var(--very-light-gray)';
-  }
+'use strict';
 
-  let clicked = false;
-  separator.appendChild(span);
-  separator.appendChild(p);
-  newDiv.appendChild(separator);
-  newDiv.appendChild(imgg);
-  todoContainer.insertBefore(newDiv, existingDiv);
-  newDivs.push(newDiv);
-
-  //  Adding Click Event Listener to the delete button
-  imgg.addEventListener('click', () => handleDeleteTask(imgg));
-
-  // Adding Click Event Listener to the change status button
-  span.addEventListener('click', () => {
-    if (!clicked) {
-      p.style.textDecoration = 'line-through';
-      p.style.color = 'var(--very-dark-grayish-blue)';
-      newDiv.classList.add('clicked');
-      span.classList.add('add');
-      clicked = true;
-    } else {
-      p.style.textDecoration = 'none';
-      if (body.classList.contains('display')) {
-        p.style.color = 'var(--very-dark-blue)';
-      } else {
-        p.style.color = 'var(--very-light-gray)';
-      }
-      span.classList.remove('add');
-      newDiv.classList.remove('clicked');
-      clicked = false;
-    }
-  });
-
-  return { newDiv, p };
+// Selecting all the DOM elements
+const DOM = {
+  toggle: document.querySelector('.toggle'),
+  body: document.querySelector('body'),
+  input: document.querySelector('.todo-input'),
+  todoContainer: document.querySelector('.todo-container'),
+  existingDiv: document.querySelector('.down'),
+  down: document.querySelector('.down'),
+  downGap: document.querySelector('.down__gap'),
+  wrap: document.querySelector('.wrap'),
+  cont: document.querySelector('.cont'),
+  changes: () => document.querySelectorAll('.change'),
+  header: document.querySelector('.header'),
+  len: document.querySelector('.length'),
+  toastSection: document.querySelector('#display__toast'),
+  toastTemplate: document.querySelector('#toast__template'),
+  completed: document.querySelector('.completed'),
+  all: document.querySelector('.all'),
+  clear: document.querySelector('.clear'),
+  active: document.querySelector('.active'),
 };
 
-//  Adding Keydown Event Listener to the todo input by pressing enter key
-input.addEventListener('keydown', e => {
-  handleAddTask(e);
-});
+// Global state
+let newDivs = [];
 
-//  Toggling the dark and light mode
-toggle.addEventListener('click', handleToggle);
+// Utility function to manipulate display property
+const setDisplay = (element, displayValue) => {
+  element.style.display = displayValue;
+};
 
-completed.addEventListener('click', handleCompleted);
+// Show toast notification
+const showToast = (message, type) => {
+  const toast = createToast(message, type);
+  DOM.toastSection.prepend(toast);
+};
 
-All.addEventListener('click', () => {
-  newDivs.forEach(newDiv => {
-    display(newDiv, 'flex');
-  });
-});
+// Create a toast element
+const createToast = (message, type) => {
+  const toast = DOM.toastTemplate.content.cloneNode(true);
+  const toastContainer = toast.querySelector('.toast__container');
+  const toastMessage = toast.querySelector('.toast__message');
+  const toastImage = toast.querySelector('.toast__image');
+  const closeToastBtn = toast.querySelector('.close__toast');
 
-clear.addEventListener('click', handleClear);
-active.addEventListener('click', handleActive);
-
-//  Showing the notification pop-up
-function showToast(message, type) {
-  toastSection.prepend(createToast(message, type));
-}
-const toast = toastTemplate.content.cloneNode(true);
-console.log(toast);
-
-function createToast(message, type) {
-  const toast = toastTemplate.content.cloneNode(true);
-  toast.querySelector('.toast__message').textContent = message;
-  toast.querySelector('.toast__container').classList.add(type);
-  if (type === 'success') {
-    toast.querySelector('.toast__image').innerHTML = `<span class="mark">&checkmark;</span>`;
-  } else if (type === 'error') {
-    toast.querySelector('.toast__image').innerHTML = `<span class="error">&times;</span>`;
-  }
-  toast.querySelector('.close__toast').addEventListener('click', removeToast);
-  toast.addEventListener('mouseover', removeToast);
-  const toastEl = toast.querySelector('.toast__container');
-
-  setTimeout(removeToast, 2000);
-
-  async function removeToast() {
-    toastEl.classList.add('remove');
-    await new Promise(resolve => setTimeout(resolve, 200));
-    toastEl.remove();
-  }
+  toastMessage.textContent = message;
+  toastContainer.classList.add(type);
+  toastImage.innerHTML = type === 'success' ? `<span class="mark">&checkmark;</span>` : `<span class="error">&times;</span>`;
+  
+  closeToastBtn.addEventListener('click', () => removeToast(toastContainer));
+  setTimeout(() => removeToast(toastContainer), 2000);
 
   return toast;
-}
+};
+
+// Remove toast element
+const removeToast = toastElement => {
+  toastElement.classList.add('remove');
+  setTimeout(() => toastElement.remove(), 200);
+};
+
+// Update the task count
+const updateTaskCount = () => {
+  DOM.len.textContent = `${newDivs.length} items left`;
+};
+
+// Add a new task
+const handleAddTask = event => {
+  if (event.key === 'Enter' && DOM.input.value.trim() !== '') {
+    const { newDiv } = createTaskDiv(DOM.input.value.trim());
+    newDivs.push(newDiv);
+    updateTaskCount();
+    DOM.input.value = '';
+    showToast('Task Added Successfully!', 'success');
+  } else if (event.key === 'Enter') {
+    showToast('The Input Value Cannot Be Empty!', 'error');
+  }
+};
+
+// Create a task div
+const createTaskDiv = taskText => {
+  const newDiv = document.createElement('div');
+  newDiv.className = 'rect';
+
+  const separator = document.createElement('div');
+  separator.className = 'separate';
+
+  const span = document.createElement('span');
+  span.className = 'label';
+  
+  const p = document.createElement('p');
+  p.className = 'change';
+  p.textContent = taskText;
+
+  const deleteIcon = document.createElement('img');
+  deleteIcon.src = 'images/icon-cross.svg';
+  deleteIcon.className = 'image';
+
+  applyThemeToTask(p);
+
+  // Event Listeners
+  deleteIcon.addEventListener('click', () => handleDeleteTask(newDiv));
+  span.addEventListener('click', () => toggleTaskStatus(newDiv, p, span));
+
+  // Append elements
+  separator.append(span, p);
+  newDiv.append(separator, deleteIcon);
+  DOM.todoContainer.insertBefore(newDiv, DOM.existingDiv);
+
+  return { newDiv };
+};
+
+// Toggle task status
+const toggleTaskStatus = (taskDiv, textElement, spanElement) => {
+  const isCompleted = taskDiv.classList.toggle('clicked');
+  spanElement.classList.toggle('add', isCompleted);
+  textElement.style.textDecoration = isCompleted ? 'line-through' : 'none';
+  applyThemeToTask(textElement, isCompleted);
+};
+
+// Apply theme styles to a task
+const applyThemeToTask = (element, isCompleted = false) => {
+  const isLightMode = DOM.body.classList.contains('display');
+  element.style.color = isCompleted
+    ? 'var(--very-dark-grayish-blue)'
+    : isLightMode
+    ? 'var(--very-dark-blue)'
+    : 'var(--very-light-gray)';
+};
+
+// Delete a task
+const handleDeleteTask = taskDiv => {
+  DOM.todoContainer.removeChild(taskDiv);
+  newDivs = newDivs.filter(div => div !== taskDiv);
+  updateTaskCount();
+  showToast('Task Deleted Successfully!', 'error');
+};
+
+// Clear completed tasks
+const handleClearCompleted = () => {
+  newDivs = newDivs.filter(div => {
+    if (div.classList.contains('clicked')) {
+      DOM.todoContainer.removeChild(div);
+      return false;
+    }
+    return true;
+  });
+  updateTaskCount();
+  showToast('Completed Tasks Cleared!', 'success');
+};
+
+// Filter tasks
+const filterTasks = filter => {
+  newDivs.forEach(div => {
+    const isVisible =
+      filter === 'all' ||
+      (filter === 'completed' && div.classList.contains('clicked')) ||
+      (filter === 'active' && !div.classList.contains('clicked'));
+    setDisplay(div, isVisible ? 'flex' : 'none');
+  });
+};
+
+// Toggle light/dark mode
+const toggleTheme = () => {
+  DOM.body.classList.toggle('display');
+  applyThemeToAllTasks();
+};
+
+// Apply theme to all tasks
+const applyThemeToAllTasks = () => {
+  const isLightMode = DOM.body.classList.contains('display');
+  DOM.changes().forEach(el => {
+    el.style.color = isLightMode ? 'var(--very-dark-blue)' : 'var(--very-light-gray)';
+  });
+};
+
+// Event Listeners
+DOM.input.addEventListener('keydown', handleAddTask);
+DOM.toggle.addEventListener('click', toggleTheme);
+DOM.completed.addEventListener('click', () => filterTasks('completed'));
+DOM.all.addEventListener('click', () => filterTasks('all'));
+DOM.clear.addEventListener('click', handleClearCompleted);
+DOM.active.addEventListener('click', () => filterTasks('active'));
